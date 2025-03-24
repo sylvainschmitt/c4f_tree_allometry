@@ -1,0 +1,28 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "C4F - Tree Allometry"
+  author: "Sylvain Schmitt"
+  date: last-modified
+  chapters:
+    - index.qmd
+    - 01_nul.qmd
+    - 02_origin.qmd
+    - 03_system.qmd
+    - 04_system-origin.qmd
+    - 05_comparisons.qmd
+  appendices:
+    - references.qmd
+
+bibliography: references.bib
+
+format:
+  html:
+    theme: cosmo
+    code-fold: true
+    number-depth: -1
+    number-sections: false
+
+editor: visual

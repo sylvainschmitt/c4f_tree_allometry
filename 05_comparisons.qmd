@@ -1,0 +1,75 @@
+```{r set}
+#| include: false 
+library(tidyverse) 
+library(cmdstanr)
+```
+
+# Comparisons
+
+```{r fits}
+data <- readRDS("data/sub.mod.data.1")
+fit_nul <- as_cmdstan_fit(list.files("chains/nul", full.names = TRUE))
+fit_s <-  as_cmdstan_fit(list.files("chains/system", full.names = TRUE))
+fit_o <-  as_cmdstan_fit(list.files("chains/origin", full.names = TRUE))
+fit_so <-  as_cmdstan_fit(list.files("chains/systemorigin", full.names = TRUE))
+data$pred_nul <- fit_nul$summary("y_p", "median")$median
+data$pred_s <- fit_s$summary("y_p", "median")$median
+data$pred_o <- fit_o$summary("y_p", "median")$median
+data$pred_so <- fit_so$summary("y_p", "median")$median
+```
+
+```{r errors}
+data %>% 
+  select(system, H, pred_nul, pred_s, pred_o, pred_so) %>% 
+  gather(model, prediction, -system, -H) %>% 
+  mutate(model = recode(model, 
+                        "pred_nul" = "nul",
+                        "pred_o" = "origin",
+                        "pred_s" = "system",
+                        "pred_so" = "system-origin")) %>% 
+  mutate(error = prediction - H) %>% 
+  ggplot(aes(error, fill = model)) +
+  geom_density(alpha = 0.5, col = NA) +
+  theme_bw() +
+  facet_wrap(~ system, scales = "free") +
+  geom_vline(xintercept = 0) +
+  theme(legend.position = "bottom")
+```
+
+```{r abs_errors}
+data %>% 
+  select(system, H, pred_nul, pred_s, pred_o, pred_so) %>% 
+  gather(model, prediction, -system, -H) %>% 
+  mutate(model = recode(model, 
+                        "pred_nul" = "nul",
+                        "pred_o" = "origin",
+                        "pred_s" = "system",
+                        "pred_so" = "system-origin")) %>% 
+  mutate(error = prediction - H) %>% 
+  ggplot(aes(abs(error), fill = model)) +
+  geom_density(alpha = 0.5, col = NA) +
+  theme_bw() +
+  facet_wrap(~ system, scales = "free") +
+  geom_vline(xintercept = 0) +
+  scale_x_sqrt() +
+  theme(legend.position = "bottom")
+```
+
+```{r abs_errors_box}
+data %>% 
+  select(system, H, pred_nul, pred_s, pred_o, pred_so) %>% 
+  gather(model, prediction, -system, -H) %>% 
+  mutate(model = recode(model, 
+                        "pred_nul" = "nul",
+                        "pred_o" = "origin",
+                        "pred_s" = "system",
+                        "pred_so" = "system-origin")) %>% 
+  mutate(error = prediction - H) %>% 
+  ggplot(aes(abs(error), fill = model)) +
+  geom_boxplot() +
+  theme_bw() +
+  facet_wrap(~ system, scales = "free") +
+  geom_vline(xintercept = 0) +
+  scale_x_sqrt() +
+  theme(legend.position = "bottom")
+```

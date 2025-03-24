@@ -1,0 +1,56 @@
+```{r set}
+#| include: false 
+library(tidyverse) 
+library(cmdstanr)
+```
+
+# Nul model
+
+$$
+h = \gamma_s \times \gamma_p \times \frac{\alpha_0 \times dbh}{\beta_0+dbh}
+$$
+
+```{r sample}
+#| eval: false
+data <- readRDS("data/sub.mod.data.1")
+model <- cmdstan_model("models/nul.stan")
+path <- "chains/nul"
+if(file.exists(path))
+  unlink(path, recursive = TRUE)
+dir.create(path)
+fit <- model$sample(
+    data = list(
+      N = nrow(data),
+      P = max(data$num_plot),
+      S = max(data$num_species),
+      plot = data$num_plot,
+      species = data$num_species,
+      h = data$H,
+      dbh = data$dbh
+    ),
+    chains = 4,
+    parallel_chains = 4,
+    save_warmup = FALSE,
+    output_dir = path,
+    refresh = 100
+  )
+```
+
+```{r fit}
+data <- readRDS("data/sub.mod.data.1")
+fit <- as_cmdstan_fit(list.files("chains/nul", full.names = TRUE))
+fit
+```
+
+```{r pvo}
+#| fig-cap: "Predicted vs. observed."
+fit$summary("y_p", "median") %>% 
+  mutate(obs = data$H) %>% 
+  ggplot(aes(median, obs)) +
+  geom_abline() +
+  geom_point() +
+  theme_bw() +
+  scale_x_log10() +
+  scale_y_log10() +
+  xlab("Predicted") + ylab("Observed")
+```
