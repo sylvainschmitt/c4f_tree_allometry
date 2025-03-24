@@ -8,23 +8,18 @@ library(cmdstanr)
 
 ```{r fits}
 #| eval: false
-data <- readRDS("data/sub.mod.data.1")
-fit_nul <- as_cmdstan_fit(list.files("chains/nul_reduced", full.names = TRUE))
-fit_s <-  as_cmdstan_fit(list.files("chains/system_reduced", full.names = TRUE))
-fit_o <-  as_cmdstan_fit(list.files("chains/origin_reduced", full.names = TRUE))
-fit_so <-  as_cmdstan_fit(list.files("chains/systemorigin_reduced", full.names = TRUE))
+data <- readRDS("data/mod.data.all")
+fit_nul <- as_cmdstan_fit(list.files("chains/nul", full.names = TRUE))
+fit_so <-  as_cmdstan_fit(list.files("chains/systemorigin", full.names = TRUE))
 data$pred_nul <- fit_nul$summary("h_p", "median")$median
-data$pred_s <- fit_s$summary("h_p", "median")$median
-data$pred_o <- fit_o$summary("h_p", "median")$median
 data$pred_so <- fit_so$summary("h_p", "median")$median
-write_tsv(data, "outputs/data_pred_1.tsv")
+write_tsv(data, "outputs/data_pred_all.tsv")
 ```
 
 ```{r errors}
 #| message: false
-read_tsv("outputs/data_pred_1.tsv") %>% 
+read_tsv("outputs/data_pred_all.tsv") %>% 
   select(system, H, pred_nul, 
-         pred_s, pred_o, 
          pred_so) %>% 
   gather(model, prediction, -system, -H) %>% 
   mutate(model = recode(model, 
@@ -43,9 +38,8 @@ read_tsv("outputs/data_pred_1.tsv") %>%
 
 ```{r abs_errors}
 #| message: false
-read_tsv("outputs/data_pred_1.tsv") %>%  
+read_tsv("outputs/data_pred_all.tsv") %>%  
   select(system, H, pred_nul, 
-         pred_s, pred_o, 
          pred_so) %>% 
   gather(model, prediction, -system, -H) %>% 
   mutate(model = recode(model, 
@@ -64,9 +58,8 @@ read_tsv("outputs/data_pred_1.tsv") %>%
 
 ```{r abs_errors_box}
 #| message: false
-read_tsv("outputs/data_pred_1.tsv") %>% 
+read_tsv("outputs/data_pred_all.tsv") %>% 
   select(system, H, pred_nul, 
-         pred_s, pred_o, 
          pred_so) %>% 
   gather(model, prediction, -system, -H) %>% 
   mutate(model = recode(model, 

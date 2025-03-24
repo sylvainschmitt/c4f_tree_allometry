@@ -1,18 +1,3 @@
-```{r set}
-#| include: false
-library(tidyverse)
-```
-
 # Introduction {.unnumbered}
 
 Define the project.
-
-```{r data}
-readRDS("data/sub.mod.data.1") %>% 
-  ggplot(aes(dbh, H)) +
-  geom_point() +
-  theme_bw() + 
-  geom_smooth(method = "lm", formula = y ~ log(x)) +
-  xlab("dbh [ cm ]") + ylab("h [ m ]") + 
-  ggtitle("10% dataset", "9,002 observations")
-```

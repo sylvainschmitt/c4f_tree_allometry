@@ -14,7 +14,7 @@ $$
 #| eval: false
 data <- readRDS("data/sub.mod.data.1")
 model <- cmdstan_model("models/nul.stan")
-path <- "chains/nul"
+path <- "chains/nul_reduced"
 if(file.exists(path))
   unlink(path, recursive = TRUE)
 dir.create(path)

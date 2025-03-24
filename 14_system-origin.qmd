@@ -4,7 +4,7 @@ library(tidyverse)
 library(cmdstanr)
 ```
 
-# System model
+# System-Origin model
 
 $$
 h = \gamma_s \times \gamma_p \times \frac{\alpha_f \times dbh}{\beta_f+dbh} \\
@@ -14,9 +14,9 @@ $$
 
 ```{r sample}
 #| eval: false
-data <- readRDS("data/sub.mod.data.1")
+data <- readRDS("data/mod.data.all")
 model <- cmdstan_model("models/factor_cov.stan")
-path <- "chains/system_reduced"
+path <- "chains/systemorigin"
 if(file.exists(path))
   unlink(path, recursive = TRUE)
 dir.create(path)
@@ -25,10 +25,10 @@ fit <- model$sample(
       N = nrow(data),
       P = max(data$num_plot),
       S = max(data$num_species),
-      "F" = max(data$sys),
+      "F" = max(data$systori),
       plot = data$num_plot,
       species = data$num_species,
-      factor = data$sys,
+      factor = data$systori,
       h = data$H,
       dbh = data$dbh
     ),

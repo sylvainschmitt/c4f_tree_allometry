@@ -1,0 +1,38 @@
+```{r set}
+#| include: false
+library(tidyverse)
+```
+
+# Full
+
+```{r data}
+readRDS("data/mod.data.all") %>% 
+  ggplot(aes(dbh, H)) +
+  geom_point() +
+  theme_bw() + 
+  geom_smooth(method = "lm", formula = y ~ log(x)) +
+  xlab("dbh [ cm ]") + ylab("h [ m ]") + 
+  facet_wrap(~ system) +
+  ggtitle("100% dataset", "90,004 observations")
+```
+
+```{r}
+readRDS("data/mod.data.all") %>% 
+  filter(system == "secondary_forest") %>% 
+  ggplot(aes(dbh, H)) +
+  geom_point() +
+  theme_bw() + 
+  geom_smooth(method = "lm", formula = y ~ log(x)) +
+  xlab("dbh [ cm ]") + ylab("h [ m ]") + 
+  facet_wrap(~ origin) +
+  ggtitle("100% dataset", "90,004 observations")
+```
+
+```{r}
+readRDS("data/sub.mod.data.1") %>% 
+  group_by(system, origin) %>% 
+  summarise( N= n()) %>% 
+  ungroup() %>% 
+  mutate(P = N / sum(N) * 100) %>% 
+  arrange(desc(P))
+```
