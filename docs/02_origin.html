@@ -245,58 +245,6 @@ h = \gamma_s \times \gamma_p \times \frac{\alpha_f \times dbh}{\beta_f+dbh} \\
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/sub.mod.data.1"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">as_cmdstan_fit</span>(<span class="fu">list.files</span>(<span class="st">"chains/origin"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning: 4 of 4000 (0.0%) transitions ended with a divergence.
-See https://mc-stan.org/misc/warnings for details.</code></pre>
-</div>
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>   variable    mean  median    sd   mad      q5     q95 rhat ess_bulk ess_tail
- lp__       8570.20 8570.42 23.72 23.64 8531.20 8608.98 1.00     1390     2214
- alpha        27.66   26.00  6.28  3.94   21.13   41.23 1.00     1668     1541
- alpha_f[1]   27.50   27.50  0.74  0.74   26.30   28.72 1.00      869     1908
- alpha_f[2]   20.03   20.02  0.03  0.02   20.00   20.10 1.00     3872     2008
- alpha_f[3]   27.73   27.69  1.44  1.45   25.44   30.24 1.00      725     1725
- sigma_a      12.88    7.64 21.40  5.11    2.97   37.38 1.00     1791     1709
- beta         19.48   17.80 10.55  6.14    6.16   37.47 1.00     1381      885
- beta_f[1]    18.43   18.40  0.86  0.87   17.07   19.90 1.00      964     2101
- beta_f[2]    10.65   10.64  0.28  0.28   10.19   11.11 1.00      295      578
- beta_f[3]    22.86   22.79  2.03  2.05   19.61   26.29 1.00     1216     2067
-
- # showing 10 of 9987 rows (change via 'max_rows' argument or 'cmdstanr_max_rows' option)</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>fit<span class="sc">$</span><span class="fu">summary</span>(<span class="st">"h_p"</span>, <span class="st">"median"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obs =</span> data<span class="sc">$</span>H) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(median, obs)) <span class="sc">+</span></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>() <span class="sc">+</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
-<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
-<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Predicted"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Observed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="02_origin_files/figure-html/pvo-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Predicted vs.&nbsp;observed.</figcaption>
-</figure>
-</div>
-</div>
-</div>
 
 
 

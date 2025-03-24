@@ -245,51 +245,6 @@ h = \gamma_s \times \gamma_p \times \frac{\alpha_f \times dbh}{\beta_f+dbh} \\
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 </div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data <span class="ot">&lt;-</span> <span class="fu">readRDS</span>(<span class="st">"data/sub.mod.data.1"</span>)</span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>fit <span class="ot">&lt;-</span> <span class="fu">as_cmdstan_fit</span>(<span class="fu">list.files</span>(<span class="st">"chains/system"</span>, <span class="at">full.names =</span> <span class="cn">TRUE</span>))</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>fit</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output cell-output-stdout">
-<pre><code>   variable    mean  median    sd   mad      q5     q95 rhat ess_bulk ess_tail
- lp__       8869.31 8869.81 23.93 23.68 8829.06 8907.69 1.01     1219     1638
- alpha        30.30   29.19  6.40  5.41   21.91   42.72 1.00     3551     2438
- alpha_f[1]   22.70   22.68  0.98  0.98   21.12   24.33 1.00      954     2004
- alpha_f[2]   20.04   20.03  0.04  0.03   20.00   20.12 1.00     5222     2362
- alpha_f[3]   38.92   38.65  3.56  3.45   33.44   45.10 1.01      901     1694
- alpha_f[4]   32.57   32.51  1.50  1.50   30.21   35.13 1.00     1528     2393
- sigma_a      15.25   11.99 13.31  6.05    5.70   34.47 1.00     2516     2133
- beta         28.89   27.30 13.61 11.14    9.05   55.11 1.00     3033     1636
- beta_f[1]    14.14   14.11  0.69  0.68   13.05   15.29 1.00     4886     3083
- beta_f[2]    10.04   10.04  0.25  0.24    9.63   10.45 1.00      631     1251
-
- # showing 10 of 9991 rows (change via 'max_rows' argument or 'cmdstanr_max_rows' option)</code></pre>
-</div>
-</div>
-<div class="cell">
-<details>
-<summary>Code</summary>
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>fit<span class="sc">$</span><span class="fu">summary</span>(<span class="st">"h_p"</span>, <span class="st">"median"</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">obs =</span> data<span class="sc">$</span>H) <span class="sc">%&gt;%</span> </span>
-<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(median, obs)) <span class="sc">+</span></span>
-<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_abline</span>() <span class="sc">+</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>() <span class="sc">+</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
-<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_y_log10</span>() <span class="sc">+</span></span>
-<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Predicted"</span>) <span class="sc">+</span> <span class="fu">ylab</span>(<span class="st">"Observed"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</details>
-<div class="cell-output-display">
-<div class="quarto-figure quarto-figure-center">
-<figure class="figure">
-<p><img src="03_system_files/figure-html/pvo-1.png" class="img-fluid figure-img" width="672"></p>
-<figcaption class="figure-caption">Predicted vs.&nbsp;observed.</figcaption>
-</figure>
-</div>
-</div>
-</div>
 
 
 

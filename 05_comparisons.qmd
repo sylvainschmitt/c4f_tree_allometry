@@ -7,6 +7,7 @@ library(cmdstanr)
 # Comparisons
 
 ```{r fits}
+#| eval: false
 data <- readRDS("data/sub.mod.data.1")
 fit_nul <- as_cmdstan_fit(list.files("chains/nul", full.names = TRUE))
 fit_s <-  as_cmdstan_fit(list.files("chains/system", full.names = TRUE))
@@ -16,10 +17,12 @@ data$pred_nul <- fit_nul$summary("h_p", "median")$median
 data$pred_s <- fit_s$summary("h_p", "median")$median
 data$pred_o <- fit_o$summary("h_p", "median")$median
 data$pred_so <- fit_so$summary("h_p", "median")$median
+write_tsv(data, "outputs/data_pred_all.tsv")
 ```
 
 ```{r errors}
-data %>% 
+#| message: false
+read_tsv("outputs/data_pred_all.tsv") %>% 
   select(system, H, pred_nul, 
          pred_s, pred_o, 
          pred_so) %>% 
@@ -39,7 +42,8 @@ data %>%
 ```
 
 ```{r abs_errors}
-data %>% 
+#| message: false
+read_tsv("outputs/data_pred_all.tsv") %>%  
   select(system, H, pred_nul, 
          pred_s, pred_o, 
          pred_so) %>% 
@@ -54,13 +58,13 @@ data %>%
   geom_density(alpha = 0.5, col = NA) +
   theme_bw() +
   facet_wrap(~ system, scales = "free") +
-  geom_vline(xintercept = 0) +
   scale_x_sqrt() +
   theme(legend.position = "bottom")
 ```
 
 ```{r abs_errors_box}
-data %>% 
+#| message: false
+read_tsv("outputs/data_pred_all.tsv") %>% 
   select(system, H, pred_nul, 
          pred_s, pred_o, 
          pred_so) %>% 
@@ -75,7 +79,6 @@ data %>%
   geom_boxplot() +
   theme_bw() +
   facet_wrap(~ system, scales = "free") +
-  geom_vline(xintercept = 0) +
   scale_x_sqrt() +
   theme(legend.position = "bottom")
 ```
