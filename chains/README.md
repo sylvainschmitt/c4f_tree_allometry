@@ -13,22 +13,32 @@ fs::dir_tree()
     ├── README.qmd
     ├── README.rmarkdown
     ├── nul
-    │   ├── nul-202503241224-1-93739a.csv
-    │   ├── nul-202503241224-2-93739a.csv
-    │   ├── nul-202503241224-3-93739a.csv
-    │   └── nul-202503241224-4-93739a.csv
-    ├── origin
-    │   ├── factor_cov-202503241313-1-0b2c06.csv
-    │   ├── factor_cov-202503241313-2-0b2c06.csv
-    │   ├── factor_cov-202503241313-3-0b2c06.csv
-    │   └── factor_cov-202503241313-4-0b2c06.csv
-    ├── system
-    │   ├── factor-202503241317-1-0ea700.csv
-    │   ├── factor-202503241317-2-0ea700.csv
-    │   ├── factor-202503241317-3-0ea700.csv
-    │   └── factor-202503241317-4-0ea700.csv
-    └── systemorigin
-        ├── factor-202503241231-1-0f910e.csv
-        ├── factor-202503241231-2-0f910e.csv
-        ├── factor-202503241231-3-0f910e.csv
-        └── factor-202503241231-4-0f910e.csv
+    │   ├── nul-202503241418-1-1500c0.csv
+    │   ├── nul-202503241418-2-1500c0.csv
+    │   ├── nul-202503241418-3-1500c0.csv
+    │   └── nul-202503241418-4-1500c0.csv
+    ├── nul_reduced
+    │   ├── nul-202503241646-1-3276e4.csv
+    │   ├── nul-202503241646-2-3276e4.csv
+    │   ├── nul-202503241646-3-3276e4.csv
+    │   └── nul-202503241646-4-3276e4.csv
+    ├── origin_reduced
+    │   ├── factor-202503241650-1-369378.csv
+    │   ├── factor-202503241650-2-369378.csv
+    │   ├── factor-202503241650-3-369378.csv
+    │   └── factor-202503241650-4-369378.csv
+    ├── system_reduced
+    │   ├── factor-202503241651-1-80a748.csv
+    │   ├── factor-202503241651-2-80a748.csv
+    │   ├── factor-202503241651-3-80a748.csv
+    │   └── factor-202503241651-4-80a748.csv
+    ├── systemorigin
+    │   ├── factor_cov-202503241441-1-4cce7f.csv
+    │   ├── factor_cov-202503241441-2-4cce7f.csv
+    │   ├── factor_cov-202503241441-3-4cce7f.csv
+    │   └── factor_cov-202503241441-4-4cce7f.csv
+    └── systemorigin_reduced
+        ├── factor-202503241647-1-0bf80b.csv
+        ├── factor-202503241647-2-0bf80b.csv
+        ├── factor-202503241647-3-0bf80b.csv
+        └── factor-202503241647-4-0bf80b.csv

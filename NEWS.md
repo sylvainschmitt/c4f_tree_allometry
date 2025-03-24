@@ -1,3 +1,4 @@
+-   c4f_tree_allometry_revisit 0.1.0.9004: changing alpha with reduced data validated, to be run on cluster with full data
 -   c4f_tree_allometry_revisit 0.1.0.9003: null & full w all data
 -   c4f_tree_allometry_revisit 0.1.0.9002: quick improve for increased data
 -   c4f_tree_allometry_revisit 0.1.0.9001: first test with sub.mod.data.1

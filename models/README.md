@@ -13,7 +13,5 @@ fs::dir_tree()
     ├── README.rmarkdown
     ├── factor
     ├── factor.stan
-    ├── factor_cov
-    ├── factor_cov.stan
     ├── nul
     └── nul.stan

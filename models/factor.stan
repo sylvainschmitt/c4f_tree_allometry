@@ -10,8 +10,8 @@ data {
   vector <lower=0> [N] dbh;
 }
 parameters {
-  real<lower=20,upper=60> alpha; // asymptotic hieght
-  vector<lower=20,upper=60> [F] alpha_f;
+  real<lower=0> alpha; // asymptotic hieght
+  vector<lower=0> [F] alpha_f;
   real<lower=0> sigma_a;
   real<lower=0,upper=80> beta; // growth speed
   vector<lower=0,upper=80> [F] beta_f;
@@ -32,4 +32,5 @@ model {
   gamma_p ~ normal(0, sigma_p);
   alpha_f ~ normal(alpha, sigma_a);
   beta_f ~ normal(beta, sigma_b);
+  alpha ~ normal(40, 10);
 }
