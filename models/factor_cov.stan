@@ -25,11 +25,15 @@ parameters {
 }
 transformed parameters {
   vector[N] h_p = (alpha_f[factor] .* dbh) ./ (beta_f[factor]+dbh);
+  array[F] vector[2] v_plot; // vector of factor alpha and beta (that have to covary) 
+  for(n in 1:F) 
+    v_plot[n] = [alpha_f[n], beta_f[n]]';
+  cov_matrix[2] cov = quad_form_diag(rho, [sigma_a,sigma_b]); // covariance matrix dist delta
 }
 model {
   log(h) ~ normal(gamma_s[species] + gamma_p[plot] + log(h_p), sigma);
   gamma_s ~ normal(0, sigma_s);
   gamma_p ~ normal(0, sigma_p);
-  alpha_f ~ normal(alpha, sigma_a);
-  beta_f ~ normal(beta, sigma_b);
+  v_plot ~ multi_normal([alpha, beta]', cov); // plots dist and delta cov
+  rho ~ lkj_corr(2);
 }

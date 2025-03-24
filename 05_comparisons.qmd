@@ -12,15 +12,17 @@ fit_nul <- as_cmdstan_fit(list.files("chains/nul", full.names = TRUE))
 fit_s <-  as_cmdstan_fit(list.files("chains/system", full.names = TRUE))
 fit_o <-  as_cmdstan_fit(list.files("chains/origin", full.names = TRUE))
 fit_so <-  as_cmdstan_fit(list.files("chains/systemorigin", full.names = TRUE))
-data$pred_nul <- fit_nul$summary("y_p", "median")$median
-data$pred_s <- fit_s$summary("y_p", "median")$median
-data$pred_o <- fit_o$summary("y_p", "median")$median
-data$pred_so <- fit_so$summary("y_p", "median")$median
+data$pred_nul <- fit_nul$summary("h_p", "median")$median
+data$pred_s <- fit_s$summary("h_p", "median")$median
+data$pred_o <- fit_o$summary("h_p", "median")$median
+data$pred_so <- fit_so$summary("h_p", "median")$median
 ```
 
 ```{r errors}
 data %>% 
-  select(system, H, pred_nul, pred_s, pred_o, pred_so) %>% 
+  select(system, H, pred_nul, 
+         pred_s, pred_o, 
+         pred_so) %>% 
   gather(model, prediction, -system, -H) %>% 
   mutate(model = recode(model, 
                         "pred_nul" = "nul",
@@ -38,7 +40,9 @@ data %>%
 
 ```{r abs_errors}
 data %>% 
-  select(system, H, pred_nul, pred_s, pred_o, pred_so) %>% 
+  select(system, H, pred_nul, 
+         pred_s, pred_o, 
+         pred_so) %>% 
   gather(model, prediction, -system, -H) %>% 
   mutate(model = recode(model, 
                         "pred_nul" = "nul",
@@ -57,7 +61,9 @@ data %>%
 
 ```{r abs_errors_box}
 data %>% 
-  select(system, H, pred_nul, pred_s, pred_o, pred_so) %>% 
+  select(system, H, pred_nul, 
+         pred_s, pred_o, 
+         pred_so) %>% 
   gather(model, prediction, -system, -H) %>% 
   mutate(model = recode(model, 
                         "pred_nul" = "nul",

@@ -30,6 +30,7 @@ fit <- model$sample(
     ),
     chains = 4,
     parallel_chains = 4,
+    threads_per_chain = 4,
     save_warmup = FALSE,
     output_dir = path,
     refresh = 100
@@ -44,7 +45,7 @@ fit
 
 ```{r pvo}
 #| fig-cap: "Predicted vs. observed."
-fit$summary("y_p", "median") %>% 
+fit$summary("h_p", "median") %>% 
   mutate(obs = data$H) %>% 
   ggplot(aes(median, obs)) +
   geom_abline() +

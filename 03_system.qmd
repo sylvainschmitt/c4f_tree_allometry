@@ -15,7 +15,7 @@ $$
 ```{r sample}
 #| eval: false
 data <- readRDS("data/sub.mod.data.1")
-model <- cmdstan_model("models/factor.stan")
+model <- cmdstan_model("models/factor_cov.stan")
 path <- "chains/system"
 if(file.exists(path))
   unlink(path, recursive = TRUE)
@@ -48,7 +48,7 @@ fit
 
 ```{r pvo}
 #| fig-cap: "Predicted vs. observed."
-fit$summary("y_p", "median") %>% 
+fit$summary("h_p", "median") %>% 
   mutate(obs = data$H) %>% 
   ggplot(aes(median, obs)) +
   geom_abline() +
