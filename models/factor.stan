@@ -21,7 +21,6 @@ parameters {
   vector [S] gamma_s; // species random effect
   real <lower=0> sigma_s;
   real<lower=0> sigma;
-  corr_matrix[2] rho; // alpha beta corr
 }
 transformed parameters {
   vector[N] h_p = (alpha_f[factor] .* dbh) ./ (beta_f[factor]+dbh);
