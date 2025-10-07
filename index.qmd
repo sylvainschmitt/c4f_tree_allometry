@@ -1,3 +1,5 @@
 # Introduction {.unnumbered}
 
 Define the project.
+
+Using a likelihood at the plot biomass following @picard2025.

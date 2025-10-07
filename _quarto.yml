@@ -8,19 +8,8 @@ book:
   date: last-modified
   chapters:
     - index.qmd
-    - part: 00_reduced.qmd
-      chapters:
-        - 01_nul.qmd
-        - 02_origin.qmd
-        - 03_system.qmd
-        - 04_system-origin.qmd
-        - 05_comparisons.qmd
-        - 06_exploration.qmd
-    - part: 10_full.qmd
-      chapters:
-        - 11_nul.qmd
-        - 14_system-origin.qmd
-        - 15_comparisons.qmd
+    - 01_data.qmd
+    - 02_model.qmd
   appendices:
     - references.qmd
 

@@ -4,7 +4,7 @@
     "href": "index.html",
     "title": "C4F - Tree Allometry",
     "section": "",
-    "text": "Introduction\nDefine the project."
+    "text": "Introduction\nDefine the project.\nUsing a likelihood at the plot biomass following Picard et al. (2025).\n\n\n\n\nPicard, Nicolas, Noël Fonton, Faustin Boyemba Bosela, Adeline Fayolle, Joël Loumeto, Gabriel Ngua Ayecaba, Bonaventure Sonké, Olga Diane Yongo Bombo, Hervé Martial Maïdou, and Alfred Ngomanda. 2025. “Selecting Allometric Equations to Estimate Forest Biomass from Plot- Rather Than Individual-Level Predictive Performance.” Biogeosciences 22 (5): 1413–26. https://doi.org/10.5194/bg-22-1413-2025."
   },
   {
     "objectID": "00_reduced.html",
@@ -82,5 +82,33 @@
     "title": "Comparisons",
     "section": "",
     "text": "Code\ndata &lt;- readRDS(\"data/mod.data.all\")\nfit_nul &lt;- as_cmdstan_fit(list.files(\"chains/nul\", full.names = TRUE))\nfit_so &lt;-  as_cmdstan_fit(list.files(\"chains/systemorigin\", full.names = TRUE))\ndata$pred_nul &lt;- fit_nul$summary(\"h_p\", \"median\")$median\ndata$pred_so &lt;- fit_so$summary(\"h_p\", \"median\")$median\nwrite_tsv(data, \"outputs/data_pred_all.tsv\")\n\n\n\n\nCode\nread_tsv(\"outputs/data_pred_all.tsv\") %&gt;% \n  select(system, H, pred_nul, \n         pred_so) %&gt;% \n  gather(model, prediction, -system, -H) %&gt;% \n  mutate(model = recode(model, \n                        \"pred_nul\" = \"nul\",\n                        \"pred_o\" = \"origin\",\n                        \"pred_s\" = \"system\",\n                        \"pred_so\" = \"system-origin\")) %&gt;% \n  mutate(error = prediction - H) %&gt;% \n  ggplot(aes(error, fill = model)) +\n  geom_density(alpha = 0.5, col = NA) +\n  theme_bw() +\n  facet_wrap(~ system, scales = \"free\") +\n  geom_vline(xintercept = 0) +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\nCode\nread_tsv(\"outputs/data_pred_all.tsv\") %&gt;%  \n  select(system, H, pred_nul, \n         pred_so) %&gt;% \n  gather(model, prediction, -system, -H) %&gt;% \n  mutate(model = recode(model, \n                        \"pred_nul\" = \"nul\",\n                        \"pred_o\" = \"origin\",\n                        \"pred_s\" = \"system\",\n                        \"pred_so\" = \"system-origin\")) %&gt;% \n  mutate(error = prediction - H) %&gt;% \n  ggplot(aes(abs(error), fill = model)) +\n  geom_density(alpha = 0.5, col = NA) +\n  theme_bw() +\n  facet_wrap(~ system, scales = \"free\") +\n  scale_x_sqrt() +\n  theme(legend.position = \"bottom\")\n\n\n\n\n\n\n\nCode\nread_tsv(\"outputs/data_pred_all.tsv\") %&gt;% \n  select(system, H, pred_nul, \n         pred_so) %&gt;% \n  gather(model, prediction, -system, -H) %&gt;% \n  mutate(model = recode(model, \n                        \"pred_nul\" = \"nul\",\n                        \"pred_o\" = \"origin\",\n                        \"pred_s\" = \"system\",\n                        \"pred_so\" = \"system-origin\")) %&gt;% \n  mutate(error = prediction - H) %&gt;% \n  ggplot(aes(abs(error), fill = model)) +\n  geom_boxplot() +\n  theme_bw() +\n  facet_wrap(~ system, scales = \"free\") +\n  scale_x_sqrt() +\n  theme(legend.position = \"bottom\")"
+  },
+  {
+    "objectID": "01_data.html#plots",
+    "href": "01_data.html#plots",
+    "title": "Data",
+    "section": "Plots",
+    "text": "Plots\n\n\nCode\nci &lt;- read_sf(\"data/ci/COTE D'IVE.shp\")\nplots &lt;- read_csv2(\"data/all_plot_corr.csv\") %&gt;% \n  select(-1) %&gt;% \n  st_as_sf(coords = c(\"long\", \"lat\"), crs = 4326) %&gt;% \n  mutate(system = gsub(\"_\", \" \", system))\nggplot(plots) +\n  geom_sf(data = ci) +\n  geom_sf(aes(col = system)) +\n  theme_bw() +\n  scale_color_discrete(\"\")\n\n\n\n\n\nCaption."
+  },
+  {
+    "objectID": "01_data.html#trees",
+    "href": "01_data.html#trees",
+    "title": "Data",
+    "section": "Trees",
+    "text": "Trees\n\n\nCode\ntrees &lt;- read_csv2(\"data/all_tree_corr.csv\") %&gt;% \n  select(-1) %&gt;% \n  mutate(system = gsub(\"_\", \" \", system)) %&gt;% \n  select(database, id_plot, id_tree, system, origin, dbh, H, genusCorr, speciesCorr) %&gt;% \n  rename(h = H, genus = genusCorr, species = speciesCorr)\ntrees$wd &lt;- BIOMASS::getWoodDensity(genus = trees$genus,\n                                    species = trees$species,\n                                    stand = trees$id_plot)$meanWD\ntrees %&gt;% \n  ggplot(aes(dbh, h, col = origin)) +\n  geom_point(alpha = .1) +\n  facet_wrap(~ system) +\n  theme_bw() +\n  geom_smooth(method = \"lm\", formula = y ~ log(x)) +\n  xlab(\"dbh [ cm ]\") + ylab(\"h [ m ]\") +\n  theme(legend.position = c(0.8, 0.2))\n\n\n\n\n\nCaption."
+  },
+  {
+    "objectID": "01_data.html#biomass",
+    "href": "01_data.html#biomass",
+    "title": "Data",
+    "section": "Biomass",
+    "text": "Biomass\n\\[\nAGB = 0.0673 \\times (wd \\times dbh^2 \\times h)^{0.976}\n\\]\nFollowing Chave et al. (2014)\n\n\nCode\nbiomass &lt;- trees %&gt;% \n  mutate(agb = 0.0673*(wd*dbh^2*h)^0.976) %&gt;% \n  group_by(database, system, id_plot) %&gt;% \n  summarise(agb = sum(agb, na.rm = TRUE)/10^3) %&gt;% \n  left_join(select(read_csv2(\"data/all_plot_corr.csv\"), id_plot, area_plot.ha, long, lat)) %&gt;% \n  mutate(agb = agb/area_plot.ha)\nbiomass %&gt;% \n  filter(agb &lt; 1000, agb &gt; 10) %&gt;% \n  na.omit() %&gt;% \n  st_as_sf(coords = c(\"long\", \"lat\"), crs = 4326) %&gt;% \n  ggplot() +\n  geom_sf(data = ci) +\n  geom_sf(aes(col = agb)) +\n  theme_bw() +\n  scale_color_viridis_c(trans = \"log\")\n\n\n\n\n\nCaption.\n\n\n\n\n\n\nCode\nbiomass %&gt;% \n  ggplot(aes(agb)) +\n  geom_histogram() +\n  scale_x_log10() +\n  theme_bw()\n\n\n\n\n\nCaption.\n\n\n\n\n\nWeird AGB needs to be explored.\n\n\n\n\n\nChave, Jérôme, Maxime Réjou-Méchain, Alberto Búrquez, Emmanuel Chidumayo, Matthew S. Colgan, Welington B. C. Delitti, Alvaro Duque, et al. 2014. “Improved Allometric Models to Estimate the Aboveground Biomass of Tropical Trees.” Global Change Biology 20 (10): 3177–90. https://doi.org/10.1111/gcb.12629."
+  },
+  {
+    "objectID": "02_model.html",
+    "href": "02_model.html",
+    "title": "Model",
+    "section": "",
+    "text": "\\[\n\\begin{align}\nagb_p \\sim \\mathcal N ( \\mu_p, \\sigma) \\\\\n\\mu_p = \\sum_{i \\in p} \\mu_i \\\\\n\\mu_i = 0.0673 \\times (wd_i \\times dbh_i^2 \\times h_i)^{0.976} \\\\\nh_i = \\gamma_s \\times \\gamma_p \\times \\frac{\\alpha_f \\times dbh_i}{\\beta_f+dbh_i} \\\\\n\\alpha_f \\sim \\mathcal N (\\alpha_0,\\sigma_a) \\\\\n\\beta_f \\sim \\mathcal N (\\beta_0,\\sigma_b) \\\\\n\\gamma_s  \\sim \\mathcal N (0,\\sigma_s) \\\\\n\\gamma_p  \\sim \\mathcal N (0,\\sigma_p) \\\\\n\\end{align}\n\\]\nWith plot \\(p\\) biomass \\(agb_p\\) linked to the sum of tree biomass \\(\\mu_i\\) defined on tree wood density \\(wd_i\\), tree diameter \\(dbh_i\\) and tree height \\(h_i\\) itself derived from \\(dbh_i\\) following a Michaelis Menten law with parameters \\(\\alpha_f\\) and \\(\\beta_f\\) depending on the factor \\(f\\) being the intersection of the \\(system\\) and the \\(origin\\) and two random parameters \\(\\gamma_s\\) representing species random effect and \\(\\gamma_p\\) representing plot random effect."
   }
 ]

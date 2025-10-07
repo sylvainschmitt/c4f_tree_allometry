@@ -1,0 +1,128 @@
+```{r set}
+#| include: false 
+library(tidyverse) 
+library(cmdstanr)
+library(bayesplot)
+```
+
+# Model
+
+$$
+\begin{align}
+agb_p \sim \mathcal N ( \mu_p, \sigma) \\
+\mu_p = \sum_{i \in p} \mu_i \\
+\mu_i = 0.0673 \times (wd_i \times dbh_i^2 \times h_i)^{0.976} \\
+h_i = \gamma_s \times \gamma_p \times \frac{\alpha_f \times dbh_i}{\beta_f+dbh_i} \\
+\alpha_f \sim \mathcal N (\alpha_0,\sigma_a) \\
+\beta_f \sim \mathcal N (\beta_0,\sigma_b) \\
+\gamma_s  \sim \mathcal N (0,\sigma_s) \\
+\gamma_p  \sim \mathcal N (0,\sigma_p) \\
+\end{align}
+$$
+
+With plot $p$ biomass $agb_p$ linked to the sum of tree biomass $\mu_i$ defined on tree wood density $wd_i$, tree diameter $dbh_i$ and tree height $h_i$ itself derived from $dbh_i$ following a Michaelis Menten law with parameters $\alpha_f$ and $\beta_f$ depending on the factor $f$ being the intersection of the $system$ and the $origin$ and two random parameters $\gamma_s$ representing species random effect and $\gamma_p$ representing plot random effect.
+
+```{r data}
+trees <- read_csv2("data/all_tree_corr.csv") %>% 
+  filter(database == "Amani") %>% # test
+  select(-1) %>% 
+  mutate(system = gsub("_", " ", system)) %>% 
+  select(database, id_plot, id_tree, system, origin, dbh, H, genusCorr, speciesCorr) %>% 
+  rename(h = H, genus = genusCorr, species = speciesCorr) %>% 
+  filter(!is.na(dbh), !is.na(h)) %>% 
+  mutate(factornum = as.numeric(as.factor(paste(system, origin)))) %>% 
+  mutate(speciesnum = as.numeric(as.factor(paste(genus, species)))) %>% 
+  mutate(plotnum = as.numeric(as.factor(id_plot))) %>% 
+  arrange(plotnum, speciesnum, factornum) %>% 
+  mutate(obs = 1:n())
+trees$wd <- BIOMASS::getWoodDensity(genus = trees$genus,
+                                    species = trees$species,
+                                    stand = trees$id_plot)$meanWD
+plots <- trees %>% 
+  mutate(agb = 0.0673*(wd*dbh^2*h)^0.976) %>% 
+  group_by(database, system, id_plot, plotnum) %>% 
+  summarise(agb = sum(agb)) 
+positions <- trees %>% 
+  group_by(plotnum) %>% 
+  summarise(start = min(obs), end = max(obs))
+mdata <- list(
+  N = nrow(trees),
+  P = nrow(plots),
+  S = max(trees$speciesnum),
+  "F" = max(trees$factornum),
+  plot = trees$plotnum,
+  species = trees$speciesnum,
+  factor = trees$factornum,
+  agb = plots$agb,
+  dbh = trees$dbh,
+  wd = trees$wd,
+  start = positions$start,
+  end = positions$end
+)
+summary(mdata)
+```
+
+```{r fit}
+#| eval: false
+model <- cmdstan_model("models/factor.stan")
+path <- "chains/systemorigin"
+if(file.exists(path))
+  unlink(path, recursive = TRUE)
+dir.create(path)
+fit <- model$sample(
+    data = mdata,
+    chains = 4,
+    parallel_chains = 4,
+    save_warmup = FALSE,
+    output_dir = path,
+    refresh = 100
+  )
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-cap: "Caption."
+fit <- as_cmdstan_fit(list.files("chains/systemorigin/", full.names = TRUE))
+fit$summary("mu") %>% 
+  mutate(obs = plots$agb) %>% 
+  ggplot(aes(median, obs)) +
+  geom_abline(col = "darkgrey") +
+  geom_segment(aes(x = median - sd, xend = median + sd), col = "darkgrey") +
+  geom_segment(aes(x = q5, xend = q95), size = .1, col = "darkgrey") +
+  geom_point() +
+  theme_bw() +
+  scale_x_log10() +
+  scale_y_log10()
+```
+
+```{r}
+#| message: false
+#| warning: false
+#| fig-cap: "Caption."
+fit$summary(c("alpha_f", "beta_f"), 
+            quantiles = ~ posterior::quantile2(., probs = c(0.05, 0.25, 
+                                                            0.5, 0.75, 0.95))) %>% 
+  separate(variable, c("parameter", "f", "factornum"), convert = TRUE) %>% 
+  select(-f) %>% 
+  left_join(select(trees, system, origin, factornum) %>% unique()) %>% 
+  select(-factornum) %>% 
+  gather(quantile, value, -parameter, -system, -origin) %>% 
+  mutate(system = gsub("_", " ", system)) %>% 
+  mutate(metric = paste0(parameter, "_", quantile)) %>% 
+  select(-parameter, -quantile) %>% 
+  pivot_wider(names_from = metric, values_from = value) %>% 
+  ggplot(aes(beta_q50, alpha_q50,
+             col = paste0(system, "\n", origin),
+             label = paste0(system, "\n", origin))) +
+  geom_segment(aes(x = beta_q25, xend = beta_q75)) +
+  geom_segment(aes(x = beta_q5, xend = beta_q95), size = .2) +
+  geom_segment(aes(y = alpha_q25, yend = alpha_q75)) +
+  geom_segment(aes(y = alpha_q5, yend = alpha_q95), size = .2) +
+  geom_point() +
+  ggrepel::geom_text_repel(box.padding = 0.4, ) +
+  theme_bw() +
+  scale_color_discrete(guide = "none") +
+  ylab("Asymptotic height [ m ]") +
+  xlab("Diameter at 50% height [ cm ]")
+```
