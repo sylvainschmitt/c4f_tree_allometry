@@ -10,16 +10,14 @@ library(bayesplot)
 $$
 \begin{align}
 log(agb) \sim \mathcal N (log(\mu), \sigma) \\
-\mu = \sum_{i \in p} 0.0673 \times (wd_i \times dbh_i^2 \times h_i)^{0.976} \\
-h_i = exp[\gamma_s + \gamma_p + log(\frac{\alpha_f \times dbh_i}{\beta_f+dbh_i})] \\
-\alpha_f \sim \mathcal N (\alpha_0,\sigma_a) \\
+\mu = \sum_{i \in p} 0.0673 \times [wd_i \times dbh_i^2 \times exp(\gamma_s + log(\frac{\alpha_f \times dbh_i}{\beta_f+dbh_i}))]^{0.976} \\
+\alpha_f \sim \mathcal N (\beta_0,\sigma_a) \\
 \beta_f \sim \mathcal N (\beta_0,\sigma_b) \\
 \gamma_s  \sim \mathcal N (0,\sigma_s) \\
-\gamma_p  \sim \mathcal N (0,\sigma_p) \\
 \end{align}
 $$
 
-With plot biomass $agb$ linked to the sum of tree biomass $\mu$ defined on tree wood density $wd_i$, tree diameter $dbh_i$ and tree height $h_i$ itself derived from $dbh_i$ following a Michaelis Menten law with parameters $\alpha_f$ and $\beta_f$ depending on the factor $f$ being the intersection of the $system$ and the $origin$ and two random parameters $\gamma_s$ representing species random effect and $\gamma_p$ representing plot random effect.
+With plot biomass $agb$ linked to the sum of tree biomass $\mu$ defined on tree wood density $wd_i$, tree diameter $dbh_i$ and tree height $h_i$ itself derived from $dbh_i$ following a Michaelis Menten law with parameters $\alpha_f$ and $\beta_f$ depending on the factor $f$ being the intersection of the $system$ and the $origin$ and a random parameters $\gamma_s$ representing species random effect.
 
 ```{r data}
 #| message: false
@@ -84,13 +82,9 @@ fit <- model$sample(
 #| message: false
 #| warning: false
 #| fig-cap: "Caption."
-# fit <- as_cmdstan_fit(list.files("chains/systemorigin/", full.names = TRUE))
-fit <- as_cmdstan_fit(c(
-  "chains/systemorigin/factor-202510071840-1-5a9e9a.csv",
-  "chains/systemorigin/factor-202510071840-2-5a9e9a.csv"
-))
+fit <- as_cmdstan_fit(list.files("chains/systemorigin/", full.names = TRUE))
 fit$draws(c("lp__", "alpha", "beta", 
-              "sigma", "sigma_p", "sigma_s", "sigma_a", "sigma_b")) %>% 
+              "sigma", "sigma_s", "sigma_a", "sigma_b")) %>% 
   mcmc_trace()
 ```
 
@@ -107,7 +101,7 @@ fit$time()$chains %>%
 #| message: false
 #| warning: false
 #| fig-cap: "Caption."
-fit$summary("mu") %>% 
+fit$summary("pred") %>% 
   mutate(obs = plots$agb) %>% 
   ggplot(aes(median, obs)) +
   geom_abline(col = "darkgrey") +
@@ -167,7 +161,7 @@ agb_chave <- trees %>%
 plots %>% 
   left_join(agb_chave) %>% 
   ungroup() %>% 
-  mutate(model = fit$summary("mu", "median")$median) %>% 
+  mutate(model = fit$summary("pred", "median")$median) %>% 
   gather(model, predicted, -database, -system, -id_plot, -plotnum, -agb) %>% 
   rename(observed = agb) %>% 
   mutate(error_log = log(observed) - log(predicted)) %>% 
