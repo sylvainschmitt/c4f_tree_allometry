@@ -9,10 +9,9 @@ library(bayesplot)
 
 $$
 \begin{align}
-agb_p \sim \mathcal N ( \mu_p, \sigma) \\
-\mu_p = \sum_{i \in p} \mu_i \\
-\mu_i = 0.0673 \times (wd_i \times dbh_i^2 \times h_i)^{0.976} \\
-h_i = \gamma_s \times \gamma_p \times \frac{\alpha_f \times dbh_i}{\beta_f+dbh_i} \\
+log(agb) \sim \mathcal N (log(\mu), \sigma) \\
+\mu = \sum_{i \in p} 0.0673 \times (wd_i \times dbh_i^2 \times h_i)^{0.976} \\
+h_i = exp[\gamma_s + \gamma_p + log(\frac{\alpha_f \times dbh_i}{\beta_f+dbh_i})] \\
 \alpha_f \sim \mathcal N (\alpha_0,\sigma_a) \\
 \beta_f \sim \mathcal N (\beta_0,\sigma_b) \\
 \gamma_s  \sim \mathcal N (0,\sigma_s) \\
@@ -20,11 +19,13 @@ h_i = \gamma_s \times \gamma_p \times \frac{\alpha_f \times dbh_i}{\beta_f+dbh_i
 \end{align}
 $$
 
-With plot $p$ biomass $agb_p$ linked to the sum of tree biomass $\mu_i$ defined on tree wood density $wd_i$, tree diameter $dbh_i$ and tree height $h_i$ itself derived from $dbh_i$ following a Michaelis Menten law with parameters $\alpha_f$ and $\beta_f$ depending on the factor $f$ being the intersection of the $system$ and the $origin$ and two random parameters $\gamma_s$ representing species random effect and $\gamma_p$ representing plot random effect.
+With plot biomass $agb$ linked to the sum of tree biomass $\mu$ defined on tree wood density $wd_i$, tree diameter $dbh_i$ and tree height $h_i$ itself derived from $dbh_i$ following a Michaelis Menten law with parameters $\alpha_f$ and $\beta_f$ depending on the factor $f$ being the intersection of the $system$ and the $origin$ and two random parameters $\gamma_s$ representing species random effect and $\gamma_p$ representing plot random effect.
 
 ```{r data}
+#| message: false
+#| warning: false
 trees <- read_csv2("data/all_tree_corr.csv") %>% 
-  filter(database == "Amani") %>% # test
+  # filter(database == "Amani") %>% # test
   select(-1) %>% 
   mutate(system = gsub("_", " ", system)) %>% 
   select(database, id_plot, id_tree, system, origin, dbh, H, genusCorr, speciesCorr) %>% 
@@ -79,11 +80,33 @@ fit <- model$sample(
   )
 ```
 
-```{r}
+```{r fitres}
 #| message: false
 #| warning: false
 #| fig-cap: "Caption."
-fit <- as_cmdstan_fit(list.files("chains/systemorigin/", full.names = TRUE))
+# fit <- as_cmdstan_fit(list.files("chains/systemorigin/", full.names = TRUE))
+fit <- as_cmdstan_fit(c(
+  "chains/systemorigin/factor-202510071840-1-5a9e9a.csv",
+  "chains/systemorigin/factor-202510071840-2-5a9e9a.csv"
+))
+fit$draws(c("lp__", "alpha", "beta", 
+              "sigma", "sigma_p", "sigma_s", "sigma_a", "sigma_b")) %>% 
+  mcmc_trace()
+```
+
+```{r time}
+#| message: false
+#| warning: false
+fit$time()$chains %>% 
+  mutate(across(c("warmup", "sampling", "total"),
+                seconds_to_period)) %>% 
+  knitr::kable()
+```
+
+```{r pvo}
+#| message: false
+#| warning: false
+#| fig-cap: "Caption."
 fit$summary("mu") %>% 
   mutate(obs = plots$agb) %>% 
   ggplot(aes(median, obs)) +
@@ -93,10 +116,12 @@ fit$summary("mu") %>%
   geom_point() +
   theme_bw() +
   scale_x_log10() +
-  scale_y_log10()
+  scale_y_log10() +
+  xlab("Predicted AGB") +
+  ylab("Observed AGB")
 ```
 
-```{r}
+```{r pars}
 #| message: false
 #| warning: false
 #| fig-cap: "Caption."
@@ -125,4 +150,29 @@ fit$summary(c("alpha_f", "beta_f"),
   scale_color_discrete(guide = "none") +
   ylab("Asymptotic height [ m ]") +
   xlab("Diameter at 50% height [ cm ]")
+```
+
+```{r comp}
+#| message: false
+#| warning: false
+#| fig-cap: "Caption."
+coords <- read_csv2("data/all_plot_corr.csv") %>% 
+  select(database, id_plot, long, lat)
+trees$agb_chave <- BIOMASS::computeAGB(D = trees$dbh, 
+                                       WD = trees$wd, 
+                                       coord = left_join(trees, coords)[c("long", "lat")])
+agb_chave <- trees %>% 
+  group_by(database, system, id_plot, plotnum) %>% 
+  summarise(chave = sum(agb_chave)*10^3) 
+plots %>% 
+  left_join(agb_chave) %>% 
+  ungroup() %>% 
+  mutate(model = fit$summary("mu", "median")$median) %>% 
+  gather(model, predicted, -database, -system, -id_plot, -plotnum, -agb) %>% 
+  rename(observed = agb) %>% 
+  mutate(error_log = log(observed) - log(predicted)) %>% 
+  ggplot(aes(system, error_log, fill = model)) +
+  geom_boxplot() +
+  theme_bw() +
+  coord_flip()
 ```
