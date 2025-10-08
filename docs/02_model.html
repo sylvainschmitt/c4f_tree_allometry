@@ -199,10 +199,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><span class="math display">\[
 \begin{align}
 log(agb) \sim \mathcal N (log(\mu), \sigma) \\
-\mu = \sum_{i \in p} 0.0673 \times [wd_i \times dbh_i^2 \times exp(\gamma_s + log(\frac{\alpha_f \times dbh_i}{\beta_f+dbh_i}))]^{0.976} \\
+\mu = \sum_{i \in p} \gamma_s \times 0.0673 \times [wd_i \times dbh_i^2 \times \frac{\alpha_f \times dbh_i}{\beta_f+dbh_i}]^{0.976} \\
+\gamma_s = exp(\epsilon_s \times \sigma_s) \\
 \alpha_f \sim \mathcal N (\beta_0,\sigma_a) \\
 \beta_f \sim \mathcal N (\beta_0,\sigma_b) \\
-\gamma_s  \sim \mathcal N (0,\sigma_s) \\
+\epsilon_s  \sim \mathcal N (0,1) \\
 \end{align}
 \]</span></p>
 <p>With plot biomass <span class="math inline">\(agb\)</span> linked to the sum of tree biomass <span class="math inline">\(\mu\)</span> defined on tree wood density <span class="math inline">\(wd_i\)</span>, tree diameter <span class="math inline">\(dbh_i\)</span> and tree height <span class="math inline">\(h_i\)</span> itself derived from <span class="math inline">\(dbh_i\)</span> following a Michaelis Menten law with parameters <span class="math inline">\(\alpha_f\)</span> and <span class="math inline">\(\beta_f\)</span> depending on the factor <span class="math inline">\(f\)</span> being the intersection of the <span class="math inline">\(system\)</span> and the <span class="math inline">\(origin\)</span> and a random parameters <span class="math inline">\(\gamma_s\)</span> representing species random effect.</p>
@@ -319,27 +320,27 @@ end       551  -none- numeric</code></pre>
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">13M 47.776S</td>
-<td style="text-align: right;">3M 27.954S</td>
-<td style="text-align: right;">17M 15.73S</td>
+<td style="text-align: right;">7M 16.94S</td>
+<td style="text-align: right;">5M 33.98S</td>
+<td style="text-align: right;">12M 50.92S</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2</td>
-<td style="text-align: right;">8M 45.01S</td>
-<td style="text-align: right;">5M 3.815S</td>
-<td style="text-align: right;">13M 48.825S</td>
+<td style="text-align: right;">6M 56.614S</td>
+<td style="text-align: right;">5M 39.191S</td>
+<td style="text-align: right;">12M 35.8049999999999S</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">3</td>
-<td style="text-align: right;">8M 55.204S</td>
-<td style="text-align: right;">12M 20.9299999999999S</td>
-<td style="text-align: right;">21M 16.1300000000001S</td>
+<td style="text-align: right;">7M 27.583S</td>
+<td style="text-align: right;">5M 33.852S</td>
+<td style="text-align: right;">13M 1.43499999999995S</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">4</td>
-<td style="text-align: right;">8M 31.037S</td>
-<td style="text-align: right;">6M 57.12S</td>
-<td style="text-align: right;">15M 28.157S</td>
+<td style="text-align: right;">7M 18.881S</td>
+<td style="text-align: right;">5M 36.712S</td>
+<td style="text-align: right;">12M 55.593S</td>
 </tr>
 </tbody>
 </table>

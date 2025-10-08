@@ -10,10 +10,11 @@ library(bayesplot)
 $$
 \begin{align}
 log(agb) \sim \mathcal N (log(\mu), \sigma) \\
-\mu = \sum_{i \in p} 0.0673 \times [wd_i \times dbh_i^2 \times exp(\gamma_s + log(\frac{\alpha_f \times dbh_i}{\beta_f+dbh_i}))]^{0.976} \\
+\mu = \sum_{i \in p} \gamma_s \times 0.0673 \times [wd_i \times dbh_i^2 \times \frac{\alpha_f \times dbh_i}{\beta_f+dbh_i}]^{0.976} \\
+\gamma_s = exp(\epsilon_s \times \sigma_s) \\
 \alpha_f \sim \mathcal N (\beta_0,\sigma_a) \\
 \beta_f \sim \mathcal N (\beta_0,\sigma_b) \\
-\gamma_s  \sim \mathcal N (0,\sigma_s) \\
+\epsilon_s  \sim \mathcal N (0,1) \\
 \end{align}
 $$
 

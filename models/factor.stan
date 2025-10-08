@@ -19,19 +19,24 @@ parameters {
   real<lower=0,upper=80> beta; // growth speed
   vector<lower=0,upper=80> [F] beta_f;
   real<lower=0> sigma_b;
-  vector [S] gamma_s; // species random effect
+  vector[S] epsilon_s; // species random effect
   real <lower=0> sigma_s;
   real<lower=0> sigma;
 }
 transformed parameters {
   vector[P] mu = rep_vector(0, P);
+  vector[S] gamma_s = exp(epsilon_s*sigma_s);
   for(p in 1:P)
      for(i in start[p]:end[p])
-        mu[p] = mu[p] + 0.0673*(wd[i]*dbh[i]^2*exp(gamma_s[species[i]] + log((alpha_f[factor[i]]*dbh[i])/(beta_f[factor[i]]+dbh[i]))))^0.976;
+        mu[p] = mu[p] +
+                gamma_s[species[i]]*0.0673*
+                (wd[i]*dbh[i]^2*
+                  (alpha_f[factor[i]]*dbh[i])/(beta_f[factor[i]]+dbh[i])
+                )^0.976;
 }
 model {
   log(agb) ~ normal(log(mu), sigma);
-  gamma_s ~ normal(0, sigma_s);
+  epsilon_s ~ std_normal();
   alpha_f ~ normal(alpha, sigma_a);
   beta_f ~ normal(beta, sigma_b);
   alpha ~ normal(40, 10);
