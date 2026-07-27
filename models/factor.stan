@@ -7,6 +7,8 @@ data {
   array[N] int<lower=1, upper=S> species;
   array[N] int<lower=1, upper=F> factor;
   vector <lower=0> [P] agb;
+  vector <lower=0> [P] agb_ha;
+  vector <lower=0> [P] area;
   vector <lower=0> [N] dbh;
   vector <lower=0> [N] wd;
   array[P] int<lower=1, upper=N> start;
@@ -43,7 +45,9 @@ model {
 }
 generated quantities {
   vector[P] pred = rep_vector(0, P);
+  vector[P] pred_ha;
   for(p in 1:P)
      for(i in start[p]:end[p])
         pred[p] = pred[p] + 0.0673*(wd[i]*dbh[i]^2*((alpha_f[factor[i]]*dbh[i])/(beta_f[factor[i]]+dbh[i])))^0.976;
+  pred_ha = pred ./ 10^3 ./ area;
 }

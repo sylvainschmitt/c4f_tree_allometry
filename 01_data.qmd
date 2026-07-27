@@ -26,6 +26,13 @@ ggplot(plots) +
 
 ## Trees
 
+> Questions:
+>
+> - What to do with NA origins (338 trees, 90 plots from AimeK database)
+> - What to do with NA dbh (239 trees, 27 plots from AimeK database)
+> - What to do with NA h (178 trees, 61 plots from AimeK database)
+> - What to do with NA dbh & h (55 trees, 18 plots from AimeK database)
+
 ```{r trees}
 #| message: false
 #| warning: false
@@ -50,9 +57,7 @@ trees %>%
 
 ## Biomass
 
-$$
-AGB = 0.0673 \times (wd \times dbh^2 \times h)^{0.976}
-$$
+$$AGB = 0.0673 \times (wd \times dbh^2 \times h)^{0.976}$$
 
 Following @chave2014
 
@@ -74,7 +79,7 @@ biomass %>%
   geom_sf(data = ci) +
   geom_sf(aes(col = agb)) +
   theme_bw() +
-  scale_color_viridis_c(trans = "log")
+  scale_color_viridis_c("AGB [ t / ha ]", trans = "log")
 ```
 
 ```{r biomass_hist}
@@ -82,10 +87,28 @@ biomass %>%
 #| warning: false
 #| fig-cap: "Caption."
 biomass %>% 
-  ggplot(aes(agb)) +
+  ggplot(aes(agb, fill = system)) +
   geom_histogram() +
   scale_x_log10() +
-  theme_bw()
+  theme_bw() +
+  geom_vline(xintercept = c(10, 1000)) +
+  xlab("AGB [ t / ha ]")
 ```
 
-> Weird AGB needs to be explored.
+> Questions
+>
+> - What to do with 160 plots with AGB\<10t/ha: 28 agroforestry from AimeK, 13 young sf from Amani, 5 plantation from ForestInnov_Lataha, 5 young sf from Nguessan and 96 agroforestry from Sanial
+> - What to do with 160 plots with AGB\>1000t/ha: 1 forest from Amani
+
+```{r biomass_hist_sel}
+#| message: false
+#| warning: false
+#| fig-cap: "Caption."
+biomass %>%
+  filter(agb < 1000, agb > 10) %>% 
+  ggplot(aes(agb, fill = system)) +
+  geom_histogram() +
+  scale_x_log10() +
+  theme_bw() +
+  xlab("AGB [ t / ha ]")
+```

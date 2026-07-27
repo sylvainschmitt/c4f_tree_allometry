@@ -7,41 +7,52 @@ library(bayesplot)
 
 # Model
 
-$$
-\begin{align}
+$$\begin{align}
 log(agb) \sim \mathcal N (log(\mu), \sigma) \\
 \mu = \sum_{i \in p} \gamma_s \times 0.0673 \times [wd_i \times dbh_i^2 \times \frac{\alpha_f \times dbh_i}{\beta_f+dbh_i}]^{0.976} \\
 \gamma_s = exp(\epsilon_s \times \sigma_s) \\
-\alpha_f \sim \mathcal N (\beta_0,\sigma_a) \\
+\alpha_f \sim \mathcal N (\alpha_0,\sigma_a) \\
 \beta_f \sim \mathcal N (\beta_0,\sigma_b) \\
 \epsilon_s  \sim \mathcal N (0,1) \\
-\end{align}
-$$
+\end{align}$$
 
 With plot biomass $agb$ linked to the sum of tree biomass $\mu$ defined on tree wood density $wd_i$, tree diameter $dbh_i$ and tree height $h_i$ itself derived from $dbh_i$ following a Michaelis Menten law with parameters $\alpha_f$ and $\beta_f$ depending on the factor $f$ being the intersection of the $system$ and the $origin$ and a random parameters $\gamma_s$ representing species random effect.
+
+> Modelling remark
+>
+> - The model is working better when modelling total AGB and not per hectare AGB that works better when computed posthoc (beware also the division by 1000 for units). **It seems also really important to keep low AGB plots for tree height scaling parameters (AGB\<10t/ha).**
+> - I developed a version pre-computing log agb and mainly using a cumulative sum trick to reduce computing time (but parrallelisation is useless).
 
 ```{r data}
 #| message: false
 #| warning: false
 trees <- read_csv2("data/all_tree_corr.csv") %>% 
-  # filter(database == "Amani") %>% # test
   select(-1) %>% 
   mutate(system = gsub("_", " ", system)) %>% 
   select(database, id_plot, id_tree, system, origin, dbh, H, genusCorr, speciesCorr) %>% 
   rename(h = H, genus = genusCorr, species = speciesCorr) %>% 
-  filter(!is.na(dbh), !is.na(h)) %>% 
-  mutate(factornum = as.numeric(as.factor(paste(system, origin)))) %>% 
-  mutate(speciesnum = as.numeric(as.factor(paste(genus, species)))) %>% 
-  mutate(plotnum = as.numeric(as.factor(id_plot))) %>% 
-  arrange(plotnum, speciesnum, factornum) %>% 
-  mutate(obs = 1:n())
+  filter(!is.na(dbh), !is.na(h))
 trees$wd <- BIOMASS::getWoodDensity(genus = trees$genus,
                                     species = trees$species,
                                     stand = trees$id_plot)$meanWD
 plots <- trees %>% 
   mutate(agb = 0.0673*(wd*dbh^2*h)^0.976) %>% 
-  group_by(database, system, id_plot, plotnum) %>% 
-  summarise(agb = sum(agb)) 
+  group_by(database, system, id_plot) %>% 
+  summarise(agb = sum(agb)) %>% 
+  left_join(select(read_csv2("data/all_plot_corr.csv"), 
+                   id_plot, area_plot.ha)) %>% 
+  mutate(agb_ha = agb/10^3/area_plot.ha) %>% 
+  filter(agb_ha > 0, agb_ha < 1000) %>% 
+  ungroup() %>% 
+  mutate(plotnum = as.numeric(as.factor(id_plot)))
+trees <- trees %>% 
+  left_join(plots) %>% 
+  filter(!is.na(plotnum)) %>% 
+  select(-agb, -agb_ha, -area_plot.ha) %>% 
+  mutate(factornum = as.numeric(as.factor(paste(system, origin)))) %>% 
+  mutate(speciesnum = as.numeric(as.factor(paste(genus, species)))) %>% 
+  arrange(plotnum, speciesnum, factornum) %>% 
+  mutate(obs = 1:n())
 positions <- trees %>% 
   group_by(plotnum) %>% 
   summarise(start = min(obs), end = max(obs))
@@ -54,18 +65,37 @@ mdata <- list(
   species = trees$speciesnum,
   factor = trees$factornum,
   agb = plots$agb,
+  agb_ha = plots$agb_ha,
+  area = plots$area_plot.ha,
   dbh = trees$dbh,
   wd = trees$wd,
   start = positions$start,
-  end = positions$end
+  end = positions$end,
+  grainsize = 1
 )
-summary(mdata)
+```
+
+```{r fit_par}
+#| eval: false
+model <- cmdstan_model("models/factor_par.stan")
+path <- "chains/systemorigin_par/"
+if(file.exists(path))
+  unlink(path, recursive = TRUE)
+dir.create(path)
+fit <- model$sample(
+  data = mdata,
+  chains = 4,
+  parallel_chains = 4,
+  save_warmup = FALSE,
+  output_dir = path,
+  refresh = 100
+)
 ```
 
 ```{r fit}
 #| eval: false
 model <- cmdstan_model("models/factor.stan")
-path <- "chains/systemorigin"
+path <- "chains/systemorigin/"
 if(file.exists(path))
   unlink(path, recursive = TRUE)
 dir.create(path)
@@ -83,11 +113,14 @@ fit <- model$sample(
 #| message: false
 #| warning: false
 #| fig-cap: "Caption."
-fit <- as_cmdstan_fit(list.files("chains/systemorigin/", full.names = TRUE))
+fit <- as_cmdstan_fit(list.files("chains/systemorigin_par/", full.names = TRUE))
 fit$draws(c("lp__", "alpha", "beta", 
               "sigma", "sigma_s", "sigma_a", "sigma_b")) %>% 
-  mcmc_trace()
+  mcmc_trace() +
+  theme_bw()
 ```
+
+> Convergences are good. Variances could be better constrained.
 
 ```{r time}
 #| message: false
@@ -102,7 +135,7 @@ fit$time()$chains %>%
 #| message: false
 #| warning: false
 #| fig-cap: "Caption."
-fit$summary("pred") %>% 
+fit$summary("mu") %>% 
   mutate(obs = plots$agb) %>% 
   ggplot(aes(median, obs)) +
   geom_abline(col = "darkgrey") +
@@ -147,6 +180,8 @@ fit$summary(c("alpha_f", "beta_f"),
   xlab("Diameter at 50% height [ cm ]")
 ```
 
+> Some systems are good other seems less, but this is not what the likelihood is optimizing.
+
 ```{r comp}
 #| message: false
 #| warning: false
@@ -158,16 +193,27 @@ trees$agb_chave <- BIOMASS::computeAGB(D = trees$dbh,
                                        coord = left_join(trees, coords)[c("long", "lat")])
 agb_chave <- trees %>% 
   group_by(database, system, id_plot, plotnum) %>% 
-  summarise(chave = sum(agb_chave)*10^3) 
+  summarise(chave = sum(agb_chave)) |> 
+  left_join(select(read_csv2("data/all_plot_corr.csv"), 
+                   id_plot, area_plot.ha)) %>% 
+  mutate(chave = chave/area_plot.ha) 
 plots %>% 
-  left_join(agb_chave) %>% 
+  left_join(agb_chave) |> 
   ungroup() %>% 
-  mutate(model = fit$summary("pred", "median")$median) %>% 
-  gather(model, predicted, -database, -system, -id_plot, -plotnum, -agb) %>% 
-  rename(observed = agb) %>% 
+  mutate(model = fit$summary("pred_ha", "median")$median) %>% 
+  gather(model, predicted, -database, -system, -id_plot,
+         -plotnum, -agb, -agb_ha, -area_plot.ha) %>% 
+  rename(observed = agb_ha) %>% 
   mutate(error_log = log(observed) - log(predicted)) %>% 
   ggplot(aes(system, error_log, fill = model)) +
   geom_boxplot() +
   theme_bw() +
   coord_flip()
 ```
+
+> Mixed results about the advantage of the model compared to the ref. Not in the case of the forest. Very important for agroforestry.
+>
+> Question
+>
+> - Repeat with null model, system only and origin only?
+> - Evaluation? Quality of fit or prediction? Cross-validation?

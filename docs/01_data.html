@@ -251,6 +251,15 @@ div.csl-indent {
 </section>
 <section id="trees" class="level2">
 <h2 class="anchored" data-anchor-id="trees">Trees</h2>
+<blockquote class="blockquote">
+<p>Questions:</p>
+<ul>
+<li>What to do with NA origins (338 trees, 90 plots from AimeK database)</li>
+<li>What to do with NA dbh (239 trees, 27 plots from AimeK database)</li>
+<li>What to do with NA h (178 trees, 61 plots from AimeK database)</li>
+<li>What to do with NA dbh &amp; h (55 trees, 18 plots from AimeK database)</li>
+</ul>
+</blockquote>
 <div class="cell">
 <details>
 <summary>Code</summary>
@@ -283,9 +292,7 @@ div.csl-indent {
 </section>
 <section id="biomass" class="level2">
 <h2 class="anchored" data-anchor-id="biomass">Biomass</h2>
-<p><span class="math display">\[
-AGB = 0.0673 \times (wd \times dbh^2 \times h)^{0.976}
-\]</span></p>
+<p><span class="math display">\[AGB = 0.0673 \times (wd \times dbh^2 \times h)^{0.976}\]</span></p>
 <p>Following <span class="citation" data-cites="chave2014">Chave et al. (<a href="references.html#ref-chave2014" role="doc-biblioref">2014</a>)</span></p>
 <div class="cell">
 <details>
@@ -304,7 +311,7 @@ AGB = 0.0673 \times (wd \times dbh^2 \times h)^{0.976}
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="at">data =</span> ci) <span class="sc">+</span></span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_sf</span>(<span class="fu">aes</span>(<span class="at">col =</span> agb)) <span class="sc">+</span></span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_c</span>(<span class="at">trans =</span> <span class="st">"log"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_viridis_c</span>(<span class="st">"AGB [ t / ha ]"</span>, <span class="at">trans =</span> <span class="st">"log"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -319,10 +326,12 @@ AGB = 0.0673 \times (wd \times dbh^2 \times h)^{0.976}
 <details>
 <summary>Code</summary>
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>biomass <span class="sc">%&gt;%</span> </span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(agb)) <span class="sc">+</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(agb, <span class="at">fill =</span> system)) <span class="sc">+</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>() <span class="sc">+</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
-<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_vline</span>(<span class="at">xintercept =</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">1000</span>)) <span class="sc">+</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"AGB [ t / ha ]"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </details>
 <div class="cell-output-display">
 <div class="quarto-figure quarto-figure-center">
@@ -334,8 +343,32 @@ AGB = 0.0673 \times (wd \times dbh^2 \times h)^{0.976}
 </div>
 </div>
 <blockquote class="blockquote">
-<p>Weird AGB needs to be explored.</p>
+<p>Questions</p>
+<ul>
+<li>What to do with 160 plots with AGB&lt;10t/ha: 28 agroforestry from AimeK, 13 young sf from Amani, 5 plantation from ForestInnov_Lataha, 5 young sf from Nguessan and 96 agroforestry from Sanial</li>
+<li>What to do with 160 plots with AGB&gt;1000t/ha: 1 forest from Amani</li>
+</ul>
 </blockquote>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>biomass <span class="sc">%&gt;%</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(agb <span class="sc">&lt;</span> <span class="dv">1000</span>, agb <span class="sc">&gt;</span> <span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(agb, <span class="at">fill =</span> system)) <span class="sc">+</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>() <span class="sc">+</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_log10</span>() <span class="sc">+</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_bw</span>() <span class="sc">+</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"AGB [ t / ha ]"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="01_data_files/figure-html/biomass_hist_sel-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Caption.</figcaption>
+</figure>
+</div>
+</div>
+</div>
 
 
 <div id="refs" class="references csl-bib-body hanging-indent" role="list" style="display: none">
